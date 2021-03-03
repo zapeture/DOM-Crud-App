@@ -3,6 +3,8 @@
 const countryForm = document.getElementById('form');
 const countryInput = document.getElementById('country');
 const addCountry = document.getElementById('country-add');
+const container = document.querySelector('.container');
+const alertDiv = document.getElementById('alert');
 const updateCountry = document.getElementById('country-update');
 const listCountry = document.getElementById('the-list');
 const documentBody = document.querySelector('body');
@@ -11,15 +13,34 @@ const documentBody = document.querySelector('body');
 //utility functionality start here
 updateCountry.style.display = 'none';
 addCountry.style.display = 'block';
+document.addEventListener('DOMContentLoaded', getCountries);
 //utility functionality end here
+
+// console.log(listCountry.previousElementSibling);
+
+//load tasks
+function getCountries() {
+  let contries;
+
+  if (localStorage.getItem('countries') === null) {
+    contries = [];
+  } else {
+    contries = JSON.parse(localStorage.getItem('countries'));
+  }
+
+  contries.forEach(function (country) {});
+}
 
 //ADD FUNCTION
 
 countryForm.addEventListener('submit', enteredInput);
 function enteredInput(e) {
-  console.log('Add function worked');
   if (countryInput.value === '') {
-    console.log('Please Enter Country in Text Fields');
+    //trgger alerts
+    triggerAlerts(
+      ` <strong>Please Enter Country in Text Field</strong>`,
+      'alert alert-danger'
+    );
   } else {
     //create a new link item
     const newLinkTag = document.createElement('li');
@@ -38,6 +59,13 @@ function enteredInput(e) {
     //appent icons to list item
     newLinkTag.appendChild(DeleteTag);
     newLinkTag.appendChild(UpdateTag);
+    //commit to local storage
+    commitToLocalStorage(`${countryInput.value}`);
+    //trgger alerts
+    triggerAlerts(
+      ` <strong>${countryInput.value}</strong> has been added`,
+      'alert alert-primary'
+    );
     //clear the text input afterwards
     countryInput.value = '';
     //append the list item to the ul
@@ -66,7 +94,11 @@ function initUpdate(e) {
     function updateTheOld(e) {
       //check if the input value is empty or not
       if (countryInput.value === '') {
-        console.log('Empty');
+        //trgger alerts
+        triggerAlerts(
+          ` <strong>Please Enter Country in Text Field</strong>`,
+          'alert alert-danger'
+        );
       } else {
         addCountry.style.display = 'block';
         updateCountry.style.display = 'none';
@@ -75,6 +107,12 @@ function initUpdate(e) {
         newTag.className = 'list-group-item list-group-item-success';
         //add the text node to the list item
         newTag.appendChild(document.createTextNode(`${countryInput.value}`));
+        //trgger alerts
+        triggerAlerts(
+          ` <strong>${countryInput.value}</strong> has been updated`,
+          'alert alert-warning'
+        );
+
         //clear the text input afterwards
         countryInput.value = '';
         //create itemtags
@@ -106,11 +144,49 @@ function initUpdate(e) {
 listCountry.addEventListener('click', initDelete);
 function initDelete(e) {
   if (e.target.classList.contains('delete')) {
-    console.log(e.target.parentElement);
-    e.target.parentElement.remove();
-  } else {
-    // console.log('no');
+    if (
+      confirm(
+        `Are you Sure You want to delete ${e.target.parentElement.childNodes[0].data}`
+      )
+    ) {
+      //trgger alerts
+      triggerAlerts(
+        ` <strong>${e.target.parentElement.childNodes[0].data}</strong> has been deleted`,
+        'alert alert-danger'
+      );
+      e.target.parentElement.remove();
+    } else {
+      //trgger alerts
+      triggerAlerts(
+        `<strong>${e.target.parentElement.childNodes[0].data}</strong> was <strong>not</strong> deleted`,
+        'alert alert-success'
+      );
+    }
   }
 
   e.preventDefault();
+}
+
+function triggerAlerts(name, type) {
+  alertDiv.innerHTML = `${name}`;
+  alertDiv.classList = `${type}`;
+
+  setTimeout(function () {
+    alertDiv.innerHTML = ``;
+    alertDiv.classList = ``;
+  }, 3000);
+}
+
+function commitToLocalStorage(country) {
+  let contries;
+
+  if (localStorage.getItem('countries') === null) {
+    contries = [];
+  } else {
+    contries = JSON.parse(localStorage.getItem('countries'));
+  }
+
+  contries.push(country);
+
+  localStorage.setItem('countries', JSON.stringify(contries));
 }
